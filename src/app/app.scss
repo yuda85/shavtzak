@@ -1,0 +1,42 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background-color: #fafafa;
+}
+
+mat-card {
+  margin-bottom: 16px;
+}
+
+mat-form-field {
+  margin-bottom: 8px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.section-divider {
+  margin: 24px 0;
+}
+
+.output-section {
+  margin-top: 24px;
+}
+
+pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+@media (max-width: 600px) {
+  div[style*="padding: 16px"] {
+    padding: 8px !important;
+  }
+  
+  mat-card {
+    margin-bottom: 12px;
+  }
+}
