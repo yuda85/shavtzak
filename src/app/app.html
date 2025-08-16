@@ -17,7 +17,7 @@
         </mat-form-field>
         <mat-form-field class="full-width">
           <mat-label>מספר רכב</mat-label>
-          <input matInput [formControl]="vehicleIdControl" maxlength="9" type="number">
+          <input matInput [formControl]="vehicleIdControl" maxlength="9">
           @if (vehicleIdControl.invalid && vehicleIdControl.touched) {
             @if (vehicleIdControl.hasError('required')) {
               <mat-error>נדרש מספר רכב</mat-error>
@@ -72,7 +72,7 @@
         </mat-form-field>
         <mat-form-field class="full-width">
           <mat-label>מספר אישי</mat-label>
-          <input matInput [formControl]="personIdControl" maxlength="7" type="number">
+          <input matInput [formControl]="personIdControl" maxlength="7">
           @if (personIdControl.invalid && personIdControl.touched) {
             @if (personIdControl.hasError('required')) {
               <mat-error>נדרש מספר אישי</mat-error>
