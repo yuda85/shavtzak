@@ -62,14 +62,14 @@ export class App {
       this.assignmentVehicleControl.valueChanges.pipe(startWith('')),
       this.vehicles$
     ]).pipe(
-      map(([value]) => this._filterVehicles(value || ''))
+      map(([value]) => this._filterVehicles(value))
     );
 
     this.filteredPeople$ = combineLatest([
       this.assignmentPersonControl.valueChanges.pipe(startWith('')),
       this.people$
     ]).pipe(
-      map(([value]) => this._filterPeople(value || ''))
+      map(([value]) => this._filterPeople(value))
     );
 
     this.output$ = combineLatest([
@@ -108,16 +108,26 @@ export class App {
     return null;
   }
 
-  private _filterVehicles(value: string): Vehicle[] {
-    const filterValue = value.toLowerCase();
+  private _filterVehicles(value: string | Vehicle | null): Vehicle[] {
+    if (!value) return this.dataService.vehicles;
+    
+    const filterValue = typeof value === 'string' 
+      ? value.toLowerCase() 
+      : `${value.designation} ${value.vehicleId}`.toLowerCase();
+      
     return this.dataService.vehicles.filter(vehicle =>
       vehicle.designation.toLowerCase().includes(filterValue) ||
       vehicle.vehicleId.toLowerCase().includes(filterValue)
     );
   }
 
-  private _filterPeople(value: string): Person[] {
-    const filterValue = value.toLowerCase();
+  private _filterPeople(value: string | Person | null): Person[] {
+    if (!value) return this.dataService.people;
+    
+    const filterValue = typeof value === 'string' 
+      ? value.toLowerCase() 
+      : `${value.fullName} ${value.idNumber}`.toLowerCase();
+      
     return this.dataService.people.filter(person =>
       person.fullName.toLowerCase().includes(filterValue) ||
       person.idNumber.includes(filterValue)
@@ -213,6 +223,12 @@ export class App {
   clearAll(): void {
     if (confirm('האם אתה בטוח שברצונך למחוק את כל הנתונים?')) {
       this.dataService.clearAll();
+    }
+  }
+
+  clearOutput(): void {
+    if (confirm('האם אתה בטוח שברצונך למחוק את השיבוץ הנוכחי?')) {
+      this.dataService.clearAssignments();
     }
   }
 

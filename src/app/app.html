@@ -157,6 +157,9 @@
         <button mat-raised-button color="accent" (click)="copyOutput()" class="full-width">
           העתק פלט
         </button>
+        <button mat-raised-button color="warn" (click)="clearOutput()" class="full-width">
+          נקה פלט
+        </button>
         @if (canShare()) {
           <button mat-raised-button (click)="shareOutput()" class="full-width">
             שיתוף

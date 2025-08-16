@@ -106,6 +106,11 @@ export class DataService {
     this.saveData();
   }
 
+  clearAssignments(): void {
+    this.assignmentsSubject.next([]);
+    this.saveData();
+  }
+
   exportData(): AppData {
     return {
       people: this.peopleSubject.value,
