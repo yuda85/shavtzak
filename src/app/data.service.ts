@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { Person, Vehicle, Assignment, AppData } from './models';
+import { Person, Vehicle, Assignment, AppData, ConvoyInfo } from './models';
 
 @Injectable({
   providedIn: 'root'
@@ -11,14 +11,17 @@ export class DataService {
   private peopleSubject = new BehaviorSubject<Person[]>([]);
   private vehiclesSubject = new BehaviorSubject<Vehicle[]>([]);
   private assignmentsSubject = new BehaviorSubject<Assignment[]>([]);
+  private convoyInfoSubject = new BehaviorSubject<ConvoyInfo | null>(null);
 
   people$ = this.peopleSubject.asObservable();
   vehicles$ = this.vehiclesSubject.asObservable();
   assignments$ = this.assignmentsSubject.asObservable();
+  convoyInfo$ = this.convoyInfoSubject.asObservable();
 
   get people() { return this.peopleSubject.value; }
   get vehicles() { return this.vehiclesSubject.value; }
   get assignments() { return this.assignmentsSubject.value; }
+  get convoyInfo() { return this.convoyInfoSubject.value; }
 
   constructor() {
     this.loadData();
@@ -32,6 +35,7 @@ export class DataService {
         this.peopleSubject.next(data.people || []);
         this.vehiclesSubject.next(data.vehicles || []);
         this.assignmentsSubject.next(data.assignments || []);
+        this.convoyInfoSubject.next(data.convoyInfo || null);
       } catch (e) {
         console.error('Error loading data from localStorage:', e);
       }
@@ -42,7 +46,8 @@ export class DataService {
     const data: AppData = {
       people: this.peopleSubject.value,
       vehicles: this.vehiclesSubject.value,
-      assignments: this.assignmentsSubject.value
+      assignments: this.assignmentsSubject.value,
+      convoyInfo: this.convoyInfoSubject.value || undefined
     };
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
   }
@@ -108,6 +113,12 @@ export class DataService {
 
   clearAssignments(): void {
     this.assignmentsSubject.next([]);
+    this.convoyInfoSubject.next(null);
+    this.saveData();
+  }
+
+  setConvoyInfo(convoyInfo: ConvoyInfo): void {
+    this.convoyInfoSubject.next(convoyInfo);
     this.saveData();
   }
 
@@ -115,7 +126,8 @@ export class DataService {
     return {
       people: this.peopleSubject.value,
       vehicles: this.vehiclesSubject.value,
-      assignments: this.assignmentsSubject.value
+      assignments: this.assignmentsSubject.value,
+      convoyInfo: this.convoyInfoSubject.value || undefined
     };
   }
 
@@ -123,6 +135,7 @@ export class DataService {
     this.peopleSubject.next(data.people || []);
     this.vehiclesSubject.next(data.vehicles || []);
     this.assignmentsSubject.next(data.assignments || []);
+    this.convoyInfoSubject.next(data.convoyInfo || null);
     this.saveData();
   }
 
@@ -130,6 +143,16 @@ export class DataService {
     const vehicles = this.vehiclesSubject.value;
     const people = this.peopleSubject.value;
     const assignments = this.assignmentsSubject.value;
+    const convoyInfo = this.convoyInfoSubject.value;
+
+    let output = '';
+
+    // Add convoy information header if available
+    if (convoyInfo) {
+      output += `מטרת השיירה: ${convoyInfo.goal}\n`;
+      output += `תאריך: ${convoyInfo.date}\n`;
+      output += `שעה: ${convoyInfo.time}\n\n`;
+    }
 
     const vehicleGroups = vehicles.map(vehicle => {
       const vehicleAssignments = assignments.filter(a => a.vehicleId === vehicle.vehicleId);
@@ -147,12 +170,14 @@ export class DataService {
       };
     }).filter(group => group.people.length > 0);
 
-    return vehicleGroups.map(group => {
+    const vehicleOutput = vehicleGroups.map(group => {
       const header = `${group.vehicle.designation} ${group.vehicle.vehicleId}`;
       const peopleLines = group.people.map(item => 
         `${item.person!.fullName} ${item.person!.idNumber} - ${item.stay ? 'שהיה' : 'ללא שהיה'}`
       );
       return [header, ...peopleLines].join('\n');
     }).join('\n\n');
+
+    return output + vehicleOutput;
   }
 }

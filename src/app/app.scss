@@ -1,11 +1,136 @@
 :host {
   display: block;
   min-height: 100vh;
-  background-color: #fafafa;
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 25%, #2c3e50 50%, #34495e 75%, #2c3e50 100%);
+  background-size: 400% 400%;
+  animation: gradientShift 20s ease infinite;
+  position: relative;
+}
+
+:host::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  // Background image will be set via JavaScript after component loads
+  background-size: cover;
+  background-position: center;
+  opacity: 0.1;
+  z-index: -1;
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.military-header {
+  background: linear-gradient(135deg, #1a252f 0%, #2c3e50 50%, #1a252f 100%);
+  border-bottom: 3px solid #e74c3c;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.military-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 2px,
+    rgba(231, 76, 60, 0.1) 2px,
+    rgba(231, 76, 60, 0.1) 4px
+  );
+  pointer-events: none;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.logo {
+  width: 60px;
+  height: 60px;
+  margin-left: 20px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  border: 2px solid #e74c3c;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 8px;
+}
+
+.header-text {
+  flex: 1;
+  text-align: center;
+}
+
+.main-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #ecf0f1;
+  margin: 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  letter-spacing: 2px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.sub-title {
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: #bdc3c7;
+  margin: 8px 0 0 0;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  letter-spacing: 1px;
+}
+
+.main-content {
+  background: rgba(255, 255, 255, 0.95);
+  min-height: calc(100vh - 140px);
+  backdrop-filter: blur(10px);
+  border-radius: 0;
+  position: relative;
+}
+
+.content-wrapper {
+  padding: 16px;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 mat-card {
   margin-bottom: 16px;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(44, 62, 80, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+mat-card-header {
+  background: linear-gradient(135deg, #34495e, #2c3e50);
+  color: white;
+  margin: -24px -24px 16px -24px;
+  padding: 16px 24px;
+  border-radius: 8px 8px 0 0;
+}
+
+mat-card-title {
+  color: #ecf0f1 !important;
+  font-weight: 600;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 mat-form-field {
@@ -29,14 +154,61 @@ pre {
   word-wrap: break-word;
   max-width: 100%;
   overflow-x: auto;
+  background: #2c3e50 !important;
+  color: #ecf0f1;
+  border: 2px solid #e74c3c;
+  font-family: 'Courier New', monospace;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-@media (max-width: 600px) {
-  div[style*="padding: 16px"] {
-    padding: 8px !important;
+// Mobile responsive design
+@media (max-width: 768px) {
+  .header-content {
+    padding: 15px;
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .logo {
+    width: 50px;
+    height: 50px;
+    margin: 0 0 15px 0;
+  }
+  
+  .main-title {
+    font-size: 2rem;
+  }
+  
+  .sub-title {
+    font-size: 1rem;
+  }
+  
+  .content-wrapper {
+    padding: 8px;
   }
   
   mat-card {
     margin-bottom: 12px;
+  }
+  
+  mat-card-header {
+    margin: -16px -16px 16px -16px;
+    padding: 12px 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-title {
+    font-size: 1.6rem;
+    letter-spacing: 1px;
+  }
+  
+  .sub-title {
+    font-size: 0.9rem;
+  }
+  
+  .logo {
+    width: 40px;
+    height: 40px;
   }
 }

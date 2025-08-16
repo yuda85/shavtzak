@@ -14,8 +14,15 @@ export interface Assignment {
   stay: boolean;
 }
 
+export interface ConvoyInfo {
+  goal: string; // מטרת השיירה
+  date: string; // תאריך
+  time: string; // שעה
+}
+
 export interface AppData {
   people: Person[];
   vehicles: Vehicle[];
   assignments: Assignment[];
+  convoyInfo?: ConvoyInfo;
 }

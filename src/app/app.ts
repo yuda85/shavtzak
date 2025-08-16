@@ -1,4 +1,4 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, OnInit, ElementRef } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -14,7 +14,7 @@ import { map, startWith } from 'rxjs/operators';
 import { Observable, combineLatest } from 'rxjs';
 
 import { DataService } from './data.service';
-import { Person, Vehicle, Assignment } from './models';
+import { Person, Vehicle, Assignment, ConvoyInfo } from './models';
 
 @Component({
   selector: 'app-root',
@@ -34,7 +34,7 @@ import { Person, Vehicle, Assignment } from './models';
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
-export class App {
+export class App implements OnInit {
   vehicleDesignationControl = new FormControl('', [Validators.required]);
   vehicleIdControl = new FormControl('', [Validators.required, App.vehicleNumberValidator]);
   
@@ -44,19 +44,30 @@ export class App {
   assignmentVehicleControl = new FormControl('');
   assignmentPersonControl = new FormControl('');
   assignmentStayControl = new FormControl(false);
+  
+  convoyGoalControl = new FormControl('', [Validators.required]);
+  convoyDateControl = new FormControl(this.getTodayDate(), [Validators.required]);
+  convoyTimeControl = new FormControl('', [Validators.required]);
+
+  getTodayDate(): string {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  }
 
   people$!: Observable<Person[]>;
   vehicles$!: Observable<Vehicle[]>;
   assignments$!: Observable<Assignment[]>;
+  convoyInfo$!: Observable<ConvoyInfo | null>;
   
   filteredVehicles$!: Observable<Vehicle[]>;
   filteredPeople$!: Observable<Person[]>;
   output$!: Observable<string>;
 
-  constructor(private dataService: DataService) {
+  constructor(private dataService: DataService, private elementRef: ElementRef) {
     this.people$ = this.dataService.people$;
     this.vehicles$ = this.dataService.vehicles$;
     this.assignments$ = this.dataService.assignments$;
+    this.convoyInfo$ = this.dataService.convoyInfo$;
     
     this.filteredVehicles$ = combineLatest([
       this.assignmentVehicleControl.valueChanges.pipe(startWith('')),
@@ -75,10 +86,33 @@ export class App {
     this.output$ = combineLatest([
       this.people$,
       this.vehicles$,
-      this.assignments$
+      this.assignments$,
+      this.convoyInfo$
     ]).pipe(
       map(() => this.dataService.generateOutput())
     );
+
+    // Load existing convoy info if available
+    this.convoyInfo$.subscribe(convoyInfo => {
+      if (convoyInfo) {
+        this.convoyGoalControl.setValue(convoyInfo.goal);
+        this.convoyDateControl.setValue(convoyInfo.date);
+        this.convoyTimeControl.setValue(convoyInfo.time);
+      }
+    });
+  }
+
+  ngOnInit(): void {
+    // Set background image after component loads
+    const hostElement = this.elementRef.nativeElement;
+    const style = document.createElement('style');
+    style.textContent = `
+      .app-background::before {
+        background-image: url('bg.png') !important;
+      }
+    `;
+    document.head.appendChild(style);
+    hostElement.classList.add('app-background');
   }
 
   static nameValidator(control: AbstractControl): ValidationErrors | null {
@@ -174,7 +208,26 @@ export class App {
     this.dataService.removePerson(idNumber);
   }
 
+  saveConvoyInfo(): void {
+    if (this.convoyGoalControl.valid && this.convoyDateControl.valid && this.convoyTimeControl.valid) {
+      const goal = this.convoyGoalControl.value?.trim();
+      const date = this.convoyDateControl.value?.trim();
+      const time = this.convoyTimeControl.value?.trim();
+      
+      if (goal && date && time) {
+        this.dataService.setConvoyInfo({ goal, date, time });
+      }
+    } else {
+      this.convoyGoalControl.markAsTouched();
+      this.convoyDateControl.markAsTouched();
+      this.convoyTimeControl.markAsTouched();
+    }
+  }
+
   addAssignment(): void {
+    // First save convoy info if it's filled
+    this.saveConvoyInfo();
+
     const vehicleValue = this.assignmentVehicleControl.value;
     const personValue = this.assignmentPersonControl.value;
     const stay = this.assignmentStayControl.value || false;
